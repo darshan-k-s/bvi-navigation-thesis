@@ -6,6 +6,7 @@ from std_msgs.msg import Float32MultiArray, String
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import ColorRGBA
 import math
+from collections import deque
 
 # ── Thresholds ───────────────────────────────────────────────
 DANGER_DIST   = 0.8
@@ -50,6 +51,9 @@ class FusionNode(Node):
         self.pub_markers  = self.create_publisher(MarkerArray, '/navigation/markers',  10)
 
         self.distances  = [4.0] * 5
+	# ADD these two lines after: self.distances = [4.0] * 5
+        self.zone_history = [deque(maxlen=3) for _ in range(5)]
+
         self.yaw_rate   = 0.0
         self.pitch      = 0.0
         self.roll       = 0.0
@@ -69,8 +73,15 @@ class FusionNode(Node):
     def zones_callback(self, msg):
         if len(msg.data) != 5:
             return
-        self.distances = list(msg.data)
+    	# Feed each zone distance into its rolling window
+        for i, d in enumerate(msg.data):
+            self.zone_history[i].append(d)
+    	# Use rolling average instead of raw value
+        self.distances = [
+            sum(h) / len(h) for h in self.zone_history
+        ]
         self.fuse()
+
 
     def fuse(self):
         d      = self.distances
