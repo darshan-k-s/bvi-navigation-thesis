@@ -31,9 +31,9 @@ setup(
    	 'console_scripts': [
        		 'imu_node = master.imu_node:main',
        		 'obstacle_zone_node = master.obstacle_zone_node:main',
-		 'feedback_node     = master.feedback_node:main',
 		 'fusion_node = master.fusion_node:main',
 		 'audio_feedback_node = master.audio_feedback_node:main',
+                 'yolo_node = master.yolo_node:main',
    	],
     },
 )
